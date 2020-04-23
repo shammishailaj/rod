@@ -1,7 +1,9 @@
 package rod_test
 
 import (
+	"github.com/ysmood/kit"
 	"github.com/ysmood/rod"
+	"github.com/ysmood/rod/lib/cdp"
 )
 
 func (s *S) TestPageElements() {
@@ -42,6 +44,38 @@ func (s *S) TestElementHas() {
 	s.False(b.HasX("//a"))
 	s.True(b.HasMatches("button", "03"))
 	s.False(b.HasMatches("button", "11"))
+}
+
+func (s *S) TestSearchFirst() {
+	p := s.page.Navigate(srcFile("fixtures/click-iframes.html"))
+	p.Search("button", func(sc *rod.Search) {
+		el := sc.First()
+		kit.Log(p.Call("DOM.getBoxModel", cdp.Object{
+			"objectId": el.ObjectID,
+		}))
+		s.True(el.Click().Parent().Has("[a=ok]"))
+	})
+}
+
+func (s *S) TestSearchRange() {
+	p := s.page.Navigate(srcFile("fixtures/selector.html")).WaitLoad()
+
+	go func() {
+		kit.Sleep(0.5)
+		p.Eval(`(url) => {
+			let f = document.createElement('iframe')
+			f.src = url
+			document.body.appendChild(f)
+		}`, srcFile("fixtures/click-iframes.html"))
+	}()
+
+	p.Search("iframe", func(sc *rod.Search) {
+		list := []string{}
+		for _, el := range sc.Range(0, sc.Count()) {
+			list = append(list, el.Describe().Get("localName").String())
+		}
+		s.Equal([]string{"iframe", "iframe", "iframe", "", ""}, list)
+	})
 }
 
 func (s *S) TestPageElementX() {

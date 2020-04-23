@@ -452,6 +452,29 @@ func (p *Page) ReleaseE(objectID string) error {
 	return err
 }
 
+// ElementFromNodeE converts an nodeId/backendNodeId into an Element
+func (p *Page) ElementFromNodeE(name string, id int64) (*Element, error) {
+	node, err := p.CallE("DOM.resolveNode", cdp.Object{
+		name: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	objectID := node.Get("object.objectId").String()
+
+	_, err = p.EvalE(false, objectID, js.Rod, cdp.Array{p.FrameID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Element{
+		page:     p,
+		ctx:      p.ctx,
+		ObjectID: objectID,
+	}, nil
+}
+
 func (p *Page) initSession() error {
 	obj, err := p.CallE("Target.attachToTarget", cdp.Object{
 		"targetId": p.TargetID,
