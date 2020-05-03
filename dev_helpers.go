@@ -13,6 +13,7 @@ import (
 	"github.com/ysmood/kit"
 	"github.com/ysmood/rod/lib/assets"
 	"github.com/ysmood/rod/lib/cdp"
+	"github.com/ysmood/rod/lib/types"
 )
 
 // check method and sleep if needed
@@ -51,7 +52,8 @@ func (b *Browser) ServeMonitor(host string) *kit.ServerContext {
 		)))
 	})
 	srv.Engine.GET("/screenshot/:id", func(ctx kit.GinContext) {
-		p, err := b.page(ctx.Param("id"))
+		id := types.TargetTargetID(ctx.Param("id"))
+		p, err := b.page(&id)
 		kit.E(err)
 
 		ctx.Header("Content-Type", "image/png;")

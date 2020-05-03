@@ -56,16 +56,6 @@ func (b *Browser) WaitEvent(name string) (wait func() *cdp.Event) {
 	}
 }
 
-// Call sends a control message to browser
-func (b *Browser) Call(method string, params interface{}) kit.JSONResult {
-	res, err := b.CallE(&cdp.Request{
-		Method: method,
-		Params: params,
-	})
-	kit.E(err)
-	return res
-}
-
 // Cookies returns the page cookies. By default it will return the cookies for current page.
 // The urls is the list of URLs for which applicable cookies will be fetched.
 func (p *Page) Cookies(urls ...string) []gjson.Result {
@@ -255,13 +245,6 @@ func (p *Page) Eval(js string, params ...interface{}) kit.JSONResult {
 func (p *Page) Release(objectID string) *Page {
 	kit.E(p.ReleaseE(objectID))
 	return p
-}
-
-// Call sends a control message to the browser with the page session, the call is always on the root frame.
-func (p *Page) Call(method string, params interface{}) kit.JSONResult {
-	res, err := p.CallE(method, params)
-	kit.E(err)
-	return res
 }
 
 // Has an element that matches the css selector
